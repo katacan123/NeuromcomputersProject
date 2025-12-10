@@ -48,13 +48,16 @@ if __name__ == "__main__":
     print("--- Resetting environment... ---")
     observation, info = env.reset()
 
-    # 🔹 Artık CRAZY yerine RULE-BASED controller kullanıyoruz
+    # Artık CRAZY yerine RULE-BASED controller kullanıyoruz
     controller = RuleBasedControllerDiscrete()
 
     rewards = []
 
     print(f"--- Starting simulation loop (100 steps) ---")
-    for i in range(100):
+    step_count = 8640
+    temp_patience = 0
+    co2_patience = 0
+    for i in range(step_count):
         terminated = False
         truncated = False
 
@@ -62,13 +65,16 @@ if __name__ == "__main__":
         # current_month = info['month']
 
         # Controller'dan action al
-        action = controller.act(observation)
+        action, temp_patience, co2_patience = controller.act(observation,temp_patience,co2_patience)
 
         # Ortamda bir adım at
         observation, reward, terminated, truncated, info = env.step(action)
         rewards.append(reward)
 
-        print(f"Step: {i+1}/100, Reward: {reward:.4f}")
+        print(f"Step: {i+1}/{step_count}, ")
+        print(f"Month:{observation[0]}, Action:{action}, Temperature:{observation[7]:.4f}")
+        print(f"CO2:{observation[10]:.4f}, Reward: {reward:.4f}, Occupancy: {observation[9]}")
+        print(f"Temperature Patience {temp_patience}, CO2 Patience {co2_patience}")
 
         if terminated or truncated:
             print(f"--- Episode finished at step {i+1}, resetting... ---")
